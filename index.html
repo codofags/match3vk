@@ -177,27 +177,26 @@
     }
 
     async function sendTokenToYourServer(data) {
-      try {
-        const response = await fetch('https://xirjkk-37-45-190-41.ru.tuna.am/api/vk-token', { 
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-API-Key': 'ваш_секретный_ключ' // Если нужно. ЗАМЕНИТЕ НА СВОЙ КЛЮЧ
-          },
-          body: JSON.stringify(data)
-        });
+  try {
+    const response = await fetch('https://xirjkk-37-45-190-41.ru.tuna.am/api/vk-token', { 
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
 
-        if (!response.ok) {
-          throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
-        }
-
-        console.log('Данные успешно отправлены на ваш сервер');
-        return await response.json();
-      } catch (error) {
-        console.error('Ошибка отправки на ваш сервер:', error);
-        showError('Ошибка сохранения данных');
-      }
+    if (!response.ok) {
+      throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
     }
+
+    console.log('Данные успешно отправлены на ваш сервер');
+    return await response.json();
+  } catch (error) {
+    console.error('Ошибка отправки на ваш сервер:', error);
+    showError('Ошибка сохранения данных');
+  }
+}
 
     async function showGame() {
       document.getElementById('authBtn').classList.add('hidden');
