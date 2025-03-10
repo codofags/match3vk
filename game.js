@@ -10,28 +10,34 @@ const colors = [
 ];
 let gameBoard = [];
 let selectedCell = null;
+const startBtn = document.getElementById('startBtn');
 const gameBoardDiv = document.getElementById('gameBoard');
 
-// Calculate new size
-const sizeReduction = 0.75; // 25% reduction
-const spriteSize = 135 * sizeReduction; //135 * 0.75;
+const spriteSize = 135;
 
 let gameStarted = false;
 
-// Function to start the game
+startBtn.addEventListener('click', startGame);
+
+
+// Функция для запуска игры
 function startGame() {
   gameStarted = true;
   initializeBoard();
   renderBoard();
+  // Скрыть кнопку
+  startBtn.style.display = 'none';
 }
 
-// Function to generate a random color
+
+
+// Функция для создания случайного цвета
 function getRandomColor() {
   const randomIndex = Math.floor(Math.random() * colors.length);
-  return `url(${colors[randomIndex]})`; // Returns URL for background-image
+  return `url(${colors[randomIndex]})`; // Возвращаем URL для background-image
 }
 
-// Function to initialize the game board
+// Функция для инициализации игрового поля
 function initializeBoard() {
   gameBoard = [];
   for (let row = 0; row < boardHeight; row++) {
@@ -46,7 +52,7 @@ function initializeBoard() {
   }
 }
 
-// Function to check for matches during generation
+// Функция для проверки наличия совпадений при генерации
 function hasMatchAt(row, col, color) {
   if (col >= 2 && gameBoard[row][col - 1] === color && gameBoard[row][col - 2] === color) {
     return true;
@@ -57,13 +63,13 @@ function hasMatchAt(row, col, color) {
   return false;
 }
 
-// Function to render the game board
+// Функция для отрисовки игрового поля
 function renderBoard() {
 
   gameBoardDiv.innerHTML = '';
 
   gameBoardDiv.style.gridTemplateColumns = `repeat(${boardWidth}, 1fr)`;
-  gameBoardDiv.style.gridTemplateRows = `repeat(${boardHeight}, 1fr)`;
+  gameBoardDiv.style.gridTemplateRows = `repeat(${boardHeight}, 1fr)`; // Явно задаем grid-template-rows
 
   for (let row = 0; row < boardHeight; row++) {
     for (let col = 0; col < boardWidth; col++) {
@@ -72,15 +78,15 @@ function renderBoard() {
       cell.dataset.row = row;
       cell.dataset.col = col;
       cell.style.backgroundImage = gameBoard[row][col];
-      cell.style.width = `${spriteSize}px`;  // Set cell size
-      cell.style.height = `${spriteSize}px`; // Set cell size
+      cell.style.width = `${spriteSize}px`;  // Устанавливаем размер ячейки
+      cell.style.height = `${spriteSize}px`; // Устанавливаем размер ячейки
       cell.addEventListener('click', handleCellClick);
       gameBoardDiv.appendChild(cell);
     }
   }
 }
 
-// Function to handle cell click
+// Функция для обработки клика по ячейке
 async function handleCellClick(event) {
   if (!gameStarted) return;
   const row = parseInt(event.target.dataset.row);
@@ -96,12 +102,12 @@ async function handleCellClick(event) {
       const cell1 = document.querySelector(`.cell[data-row="${selectedCell.row}"][data-col="${selectedCell.col}"]`);
       const cell2 = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
 
-      // Swap animation
+      // Анимация обмена
       cell1.classList.add('swapping');
       cell2.classList.add('swapping');
 
-      // Animation pause
-      await delay(100);
+      // Пауза для анимации
+      await delay(200);
 
       swapCells(selectedCell.row, selectedCell.col, row, col);
       renderBoard();
@@ -112,12 +118,12 @@ async function handleCellClick(event) {
       if (findMatches()) {
         await handleMatches();
       } else {
-        // Undo swap animation
+        // Анимация отмены обмена
         cell1.classList.add('swapping');
         cell2.classList.add('swapping');
 
-        // Animation pause
-        await delay(100);
+        // Пауза для анимации
+        await delay(200);
 
         swapCells(selectedCell.row, selectedCell.col, row, col);
         renderBoard();
@@ -132,24 +138,24 @@ async function handleCellClick(event) {
   }
 }
 
-// Delay function for animations
+// Функция задержки (для анимаций)
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Function to swap cells
+// Функция для обмена ячеек местами
 function swapCells(row1, col1, row2, col2) {
   const tempColor = gameBoard[row1][col1];
   gameBoard[row1][col1] = gameBoard[row2][col2];
   gameBoard[row2][col2] = tempColor;
 }
 
-// Function to find matches
+// Функция для поиска совпадений
 function findMatches() {
   let matchesFound = false;
   let matches = [];
 
-  // Horizontal check
+  // Проверка по горизонтали
   for (let row = 0; row < boardHeight; row++) {
     for (let col = 0; col < boardWidth - 2; col++) {
       const color = gameBoard[row][col];
@@ -161,7 +167,7 @@ function findMatches() {
     }
   }
 
-  // Vertical check
+  // Проверка по вертикали
   for (let col = 0; col < boardWidth; col++) {
     for (let row = 0; row < boardHeight - 2; row++) {
       const color = gameBoard[row][col];
@@ -178,7 +184,8 @@ function findMatches() {
   return matchesFound;
 }
 
-// Function to handle and remove matches (with animation)
+
+// Функция для обработки и удаления совпадений (с анимацией)
 async function handleMatches() {
   let hasMatches;
   do {
@@ -191,12 +198,11 @@ async function handleMatches() {
   } while (hasMatches && findMatches());
 }
 
-// Function to remove matches with animation
 async function removeMatchesWithAnimation() {
   let matchesHorizontally = [];
   let matchesVertically = [];
 
-  // Find horizontal matches
+  // Находим горизонтальные совпадения
   for (let row = 0; row < boardHeight; row++) {
     for (let col = 0; col < boardWidth - 2; col++) {
       const color = gameBoard[row][col];
@@ -209,7 +215,7 @@ async function removeMatchesWithAnimation() {
     }
   }
 
-  // Find vertical matches
+  // Находим вертикальные совпадения
   for (let col = 0; col < boardWidth; col++) {
     for (let row = 0; row < boardHeight - 2; row++) {
       const color = gameBoard[row][col];
@@ -225,24 +231,24 @@ async function removeMatchesWithAnimation() {
   const allMatches = new Set([...matchesHorizontally.map(m => JSON.stringify(m)), ...matchesVertically.map(m => JSON.stringify(m))]);
   const uniqueMatches = Array.from(allMatches).map(m => JSON.parse(m));
 
-  // Animate removal
+  // Анимация удаления и обновление очков
   for (const match of uniqueMatches) {
     const cell = document.querySelector(`.cell[data-row="${match.row}"][data-col="${match.col}"]`);
     if (cell) {
       cell.classList.add('removing');
-      await delay(100);
+      await delay(200);
       gameBoard[match.row][match.col] = null;
     }
   }
   return uniqueMatches.length > 0;
 }
 
-// Function to drop cells
+// Функция для сдвига ячеек вниз
 function dropCells() {
   for (let col = 0; col < boardWidth; col++) {
-    let emptyRow = boardHeight - 1;
+    let emptyRow = boardHeight - 1; // Инициализируем здесь
 
-    // Shift existing cells down
+    // Сдвигаем существующие ячейки вниз
     for (let row = boardHeight - 1; row >= 0; row--) {
       if (gameBoard[row][col] !== null) {
         gameBoard[emptyRow][col] = gameBoard[row][col];
@@ -253,7 +259,7 @@ function dropCells() {
       }
     }
 
-    // Fill remaining empty cells
+    // Заполняем оставшиеся пустые ячейки
     while (emptyRow >= 0) {
       let color;
       do {
