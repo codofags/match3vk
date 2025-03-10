@@ -7,7 +7,7 @@
   <style>
     @font-face {
       font-family: 'Curse Casual';
-      src: url('fonts/CurseCasual.ttf') format('truetype');
+      src: url('fonts/CurseCasual.ttf') format('truetype'); /* Путь к вашему файлу шрифта */
     }
 
     body {
@@ -32,8 +32,8 @@
       display: grid;
       grid-gap: 2px;
       border: 1px solid black;
-      width: 1100px;
-      height: 1100px;
+      width: 800px;
+      height: 800px;
       background-color: #77B5FE;
       border-radius: 20px;
       overflow: hidden;
@@ -41,12 +41,12 @@
     }
 
     .cell {
-      width: 135px;
-      height: 135px;
+      width: 100px;
+      height: 100px;
       text-align: center;
       font-size: 24px;
       cursor: pointer;
-      transition: transform 0.2s ease, background-color 0.2s ease;
+      transition: transform 0.15s ease, background-color 0.15s ease, opacity 0.15s ease;
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
@@ -55,12 +55,11 @@
     }
 
     .cell.swapping {
-      transform: scale(1.2);
+      transform: scale(1.1);
     }
 
     .cell.removing {
-      opacity: 0;
-      transition: opacity 0.2s ease;
+      opacity: 0.5;
     }
 
     #startBtn {
@@ -86,36 +85,11 @@
 </head>
 <body>
 
-  <div id="gameContainer">
-    <button id="startBtn">Start Game</button>
-    <div id="gameBoard"></div>
-  </div>
+<div id="gameContainer">
+  <button id="startBtn" onclick="startGame()">Start Game</button>
+  <div id="gameBoard"></div>
+</div>
 
-  <!-- Подключаем VK Bridge -->
-  <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
-
-  <script>
-    async function startGame() {
-      try {
-        if (vkBridge.supports('VKWebAppInit')) {
-          console.log('Инициализация VK Bridge...');
-          await vkBridge.send('VKWebAppInit');
-          console.log('VK Bridge успешно инициализирован.');
-        }
-      } catch (error) {
-        console.warn('Ошибка при инициализации VK Bridge:', error);
-      }
-
-      // Скрываем кнопку и запускаем игру
-      document.getElementById('startBtn').style.display = 'none';
-      console.log('Запуск game.js...');
-      startGameFromScript(); // Вызов функции из game.js
-    }
-
-    document.getElementById('startBtn').addEventListener('click', startGame);
-  </script>
-
-  <!-- Подключаем game.js -->
-  <script src="game.js"></script>
+<script src="game.js"></script>
 </body>
 </html>
