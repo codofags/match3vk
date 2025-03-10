@@ -76,7 +76,7 @@
 
   <div id="gameContainer">
     <!-- Скрытие кнопки через this.style.display='none' в атрибуте onclick -->
-    <button id="startBtn" onclick="this.style.display='none'; startGame()">Start</button>
+    <button id="startBtn" onclick="this.style.display='none'; startGame()">Play</button>
     <div id="gameBoard"></div>
   </div>
 
@@ -96,7 +96,7 @@
 
         // Запрос токена с правами доступа
         const authData = await vkBridge.send("VKWebAppGetAuthToken", {
-          app_id: YOUR_APP_ID,  // Замените на ID вашего приложения
+          app_id: 8109529,  // Замените на ID вашего приложения
           scope: "friends,photos"  // Укажите нужные права
         });
         console.log("Токен получен:", authData.access_token);
