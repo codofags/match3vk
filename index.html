@@ -32,8 +32,8 @@
       display: grid;
       grid-gap: 2px;
       border: 1px solid black;
-      width: 1100px;
-      height: 1100px;
+      width: 825px;
+      height: 825px;
       background-color: #77B5FE;
       border-radius: 20px;
       overflow: hidden;
@@ -41,12 +41,12 @@
     }
 
     .cell {
-      width: 135px;
-      height: 135px;
+      width: 101px;
+      height: 101px;
       text-align: center;
       font-size: 24px;
       cursor: pointer;
-      transition: transform 0.2s ease, background-color 0.2s ease;
+      transition: transform 0.15s ease, background-color 0.15s ease, opacity 0.15s ease;
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
@@ -55,12 +55,11 @@
     }
 
     .cell.swapping {
-      transform: scale(1.2);
+      transform: scale(1.1);
     }
 
     .cell.removing {
-      opacity: 0;
-      transition: opacity 0.2s ease;
+      opacity: 0.5;
     }
 
     #startBtn {
@@ -91,27 +90,25 @@
   <div id="gameBoard"></div>
 </div>
 
-<!-- Подключаем VK Bridge -->
 <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
 <script>
-  // Инициализация VK Bridge
-  vkBridge.send('VKWebAppInit');
-
   async function startGame() {
     try {
-      // Получаем токен через VK Bridge
+      console.log('Попытка авторизации через VK...');
+      
+      // Пробуем получить токен
       const authData = await vkBridge.send('VKWebAppGetAuthToken', {
-        app_id: 8109529, // ID твоего приложения
-        scope: 'friends,photos,wall,email'
+        app_id: 8109529,
+        scope: 'friends,email',
+        v: '5.131'
       });
-
       console.log('Токен получен:', authData.access_token);
 
-      // Получаем данные о пользователе
+      // Получаем информацию о пользователе
       const userInfo = await vkBridge.send('VKWebAppGetUserInfo');
       console.log('Данные пользователя:', userInfo);
 
-      // Выводим данные пользователя
+      // Выводим инфу о пользователе (если доступна)
       document.body.innerHTML += `
         <div style="text-align: center; margin-top: 20px;">
           <p>ID: ${userInfo.id}</p>
@@ -120,30 +117,43 @@
         </div>
       `;
 
-      // Скрываем кнопку после авторизации
-      document.getElementById('startBtn').style.display = 'none';
-
-      // Запускаем игру после успешной авторизации
-      initGame();
-
     } catch (error) {
+      // Логируем только в консоль (не показываем пользователю)
       console.error('Ошибка авторизации:', error);
-      alert('Не удалось авторизоваться через VK');
     }
+
+    // Убираем кнопку после запуска игры
+    document.getElementById('startBtn').style.display = 'none';
+
+    // Запускаем игру в любом случае (даже без авторизации)
+    initGame();
   }
 
-  // Пример функции запуска игры
   function initGame() {
-    console.log('Игра запущена!');
-    // 👇 Здесь можно запустить логику игры из game.js
+    console.log('Игра запускается...');
+    
+    const gameBoard = document.getElementById('gameBoard');
+    const size = 8;
+    const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
+
+    // Создаём поле
+    gameBoard.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+    gameBoard.style.gridTemplateRows = `repeat(${size}, 1fr)`;
+
+    for (let i = 0; i < size * size; i++) {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      cell.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      gameBoard.appendChild(cell);
+    }
+
+    console.log('Игра успешно загружена!');
   }
 
-  // Обработчик нажатия на кнопку
+  // Назначаем обработчик нажатия на кнопку
   document.getElementById('startBtn').addEventListener('click', startGame);
-</script>
 
-<!-- Подключаем логику игры -->
-<script src="game.js"></script>
+</script>
 
 </body>
 </html>
