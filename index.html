@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Match 3</title>
+  <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
   <style>
     body {
       background: linear-gradient(to bottom, #ADD8E6, #87CEEB);
@@ -85,26 +86,48 @@
     <div id="gameBoard"></div>
   </div>
 
-  <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
   <script>
     async function startGame() {
-      try {
-        await vkBridge.send('VKWebAppInit');
-        console.log('VK Bridge initialized');
-      } catch (error) {
-        console.error('VK Bridge initialization failed', error);
+      // Скрываем кнопку сразу
+      document.getElementById("startBtn").style.display = "none";
+
+      if (!vkBridge.isEmbedded()) {
+        console.warn("Приложение запущено вне VK Mini Apps. Некоторые функции могут не работать.");
       }
 
-      document.getElementById('startBtn').style.display = 'none';
+      try {
+        await vkBridge.send("VKWebAppInit");
+        console.log("VK Bridge инициализирован");
+      } catch (error) {
+        console.error("Ошибка инициализации VK Bridge:", error);
+      }
 
-      if (typeof initializeBoard === 'function') {
+      try {
+        const userInfo = await vkBridge.send("VKWebAppGetUserInfo");
+        console.log("Данные пользователя:", userInfo);
+      } catch (error) {
+        console.error("Ошибка получения данных пользователя:", error);
+      }
+
+      try {
+        const authData = await vkBridge.send("VKWebAppGetAuthToken", {
+          app_id: YOUR_APP_ID,  // Замените на ID вашего приложения
+          scope: "friends,photos" // Укажите нужные права
+        });
+        console.log("Токен получен:", authData.access_token);
+      } catch (error) {
+        console.error("Ошибка получения токена:", error);
+      }
+
+      if (typeof initializeBoard === "function") {
         initializeBoard();
         renderBoard();
       } else {
-        console.error('Game logic not found!');
+        console.error("Логика игры не найдена!");
       }
     }
   </script>
+
   <script src="game.js"></script>
 </body>
 </html>
