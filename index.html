@@ -82,17 +82,18 @@
 <body>
 
   <div id="gameContainer">
-    <button id="startBtn" onclick="startGame()">Start Game</button>
+    <button id="startBtn" onclick="startGame()">Start</button>
     <div id="gameBoard"></div>
   </div>
 
   <script>
     async function startGame() {
-      // Скрываем кнопку сразу
+      // Скрыть кнопку сразу после нажатия
       document.getElementById("startBtn").style.display = "none";
 
+      // Проверка на то, что приложение внутри VK Mini Apps
       if (!vkBridge.isEmbedded()) {
-        console.warn("Приложение запущено вне VK Mini Apps. Некоторые функции могут не работать.");
+        console.warn("Приложение запущено не в VK Mini Apps. Некоторые функции могут не работать.");
       }
 
       try {
@@ -103,6 +104,7 @@
       }
 
       try {
+        // Получение информации о пользователе
         const userInfo = await vkBridge.send("VKWebAppGetUserInfo");
         console.log("Данные пользователя:", userInfo);
       } catch (error) {
@@ -110,15 +112,17 @@
       }
 
       try {
+        // Запрос токена
         const authData = await vkBridge.send("VKWebAppGetAuthToken", {
           app_id: YOUR_APP_ID,  // Замените на ID вашего приложения
-          scope: "friends,photos" // Укажите нужные права
+          scope: "friends,photos"  // Укажите нужные права
         });
         console.log("Токен получен:", authData.access_token);
       } catch (error) {
         console.error("Ошибка получения токена:", error);
       }
 
+      // Запуск игры
       if (typeof initializeBoard === "function") {
         initializeBoard();
         renderBoard();
