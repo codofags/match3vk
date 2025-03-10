@@ -4,10 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Match 3</title>
+  <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
   <style>
     @font-face {
       font-family: 'Curse Casual';
-      src: url('fonts/CurseCasual.ttf') format('truetype'); /* Путь к вашему файлу шрифта */
+      src: url('fonts/CurseCasual.ttf') format('truetype');
     }
 
     body {
@@ -32,8 +33,8 @@
       display: grid;
       grid-gap: 2px;
       border: 1px solid black;
-      width: 800px;
-      height: 800px;
+      width: 850px;
+      height: 850px;
       background-color: #77B5FE;
       border-radius: 20px;
       overflow: hidden;
@@ -41,8 +42,8 @@
     }
 
     .cell {
-      width: 100px;
-      height: 100px;
+      width: 106px;
+      height: 106px;
       text-align: center;
       font-size: 24px;
       cursor: pointer;
@@ -90,6 +91,129 @@
   <div id="gameBoard"></div>
 </div>
 
-<script src="game.js"></script>
+<script>
+  const boardWidth = 8;
+  const boardHeight = 8;
+  const colors = [
+    'img/red.png',
+    'img/blue.png',
+    'img/green.png',
+    'img/yellow.png',
+    'img/purple.png',
+    'img/white.png'
+  ];
+  let gameBoard = [];
+  let selectedCell = null;
+  const gameBoardDiv = document.getElementById('gameBoard');
+
+  // Размер ячеек
+  const spriteSize = 106;
+
+  let gameStarted = false;
+
+  // VK Bridge инициализация
+  vkBridge.send('VKWebAppInit');
+
+  // Старт игры
+  function startGame() {
+    gameStarted = true;
+
+    // Убираем кнопку старта после запуска
+    document.getElementById('startBtn').style.display = 'none';
+
+    initializeBoard();
+    renderBoard();
+  }
+
+  // Генерация случайного цвета
+  function getRandomColor() {
+    const randomIndex = Math.floor(Math.random() * colors.length);
+    return `url(${colors[randomIndex]})`;
+  }
+
+  // Инициализация поля
+  function initializeBoard() {
+    gameBoard = [];
+    for (let row = 0; row < boardHeight; row++) {
+      gameBoard[row] = [];
+      for (let col = 0; col < boardWidth; col++) {
+        let color;
+        do {
+          color = getRandomColor();
+        } while (hasMatchAt(row, col, color));
+        gameBoard[row][col] = color;
+      }
+    }
+  }
+
+  // Проверка совпадений
+  function hasMatchAt(row, col, color) {
+    if (col >= 2 && gameBoard[row][col - 1] === color && gameBoard[row][col - 2] === color) {
+      return true;
+    }
+    if (row >= 2 && gameBoard[row - 1][col] === color && gameBoard[row - 2][col] === color) {
+      return true;
+    }
+    return false;
+  }
+
+  // Отрисовка поля
+  function renderBoard() {
+    gameBoardDiv.innerHTML = '';
+
+    gameBoardDiv.style.gridTemplateColumns = `repeat(${boardWidth}, 1fr)`;
+    gameBoardDiv.style.gridTemplateRows = `repeat(${boardHeight}, 1fr)`;
+
+    for (let row = 0; row < boardHeight; row++) {
+      for (let col = 0; col < boardWidth; col++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.row = row;
+        cell.dataset.col = col;
+        cell.style.backgroundImage = gameBoard[row][col];
+        cell.style.width = `${spriteSize}px`;
+        cell.style.height = `${spriteSize}px`;
+        cell.addEventListener('click', handleCellClick);
+        gameBoardDiv.appendChild(cell);
+      }
+    }
+  }
+
+  // Логика нажатия на ячейку
+  async function handleCellClick(event) {
+    if (!gameStarted) return;
+    const row = parseInt(event.target.dataset.row);
+    const col = parseInt(event.target.dataset.col);
+
+    if (selectedCell === null) {
+      selectedCell = { row, col };
+    } else {
+      const rowDiff = Math.abs(row - selectedCell.row);
+      const colDiff = Math.abs(col - selectedCell.col);
+
+      if ((rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1)) {
+        swapCells(selectedCell.row, selectedCell.col, row, col);
+        renderBoard();
+        selectedCell = null;
+      } else {
+        selectedCell = { row, col };
+      }
+    }
+  }
+
+  // Перестановка ячеек
+  function swapCells(row1, col1, row2, col2) {
+    const temp = gameBoard[row1][col1];
+    gameBoard[row1][col1] = gameBoard[row2][col2];
+    gameBoard[row2][col2] = temp;
+  }
+
+  // Задержка для анимации
+  function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+</script>
+
 </body>
 </html>
