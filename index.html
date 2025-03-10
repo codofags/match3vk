@@ -122,7 +122,7 @@
         document.getElementById('userName').style.display = 'block';
 
         updateStatus('Добро пожаловать!');
-        showGame();
+        await showGame();
 
       } catch (error) {
         showError(`Ошибка: ${error.message || 'Неизвестная ошибка'}`);
@@ -130,10 +130,23 @@
       }
     }
 
-    function showGame() {
+    async function showGame() {
       document.getElementById('authBtn').classList.add('hidden');
       document.getElementById('game').classList.remove('hidden');
-      loadGameScript();
+      
+      try {
+        await loadGameScript();
+        if (typeof initializeGame === 'function') {
+          initializeGame({
+            token: accessToken,
+            user: userInfo
+          });
+        } else {
+          showError('Ошибка инициализации игры');
+        }
+      } catch (error) {
+        showError('Не удалось загрузить игру');
+      }
     }
 
     function loadGameScript() {
@@ -141,21 +154,10 @@
         const script = document.createElement('script');
         script.src = 'game.js';
         script.onload = resolve;
-        script.onerror = () => showError('Ошибка загрузки игры');
+        script.onerror = reject;
         document.head.appendChild(script);
       });
     }
-
-    window.startGame = () => {
-      if (typeof initializeGame === 'function') {
-        initializeGame({
-          token: accessToken,
-          user: userInfo
-        });
-      } else {
-        showError('Ошибка инициализации игры');
-      }
-    };
 
     document.getElementById('authBtn').addEventListener('click', initialize);
   </script>
