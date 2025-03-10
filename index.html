@@ -7,19 +7,19 @@
   <style>
     @font-face {
       font-family: 'Curse Casual';
-      src: url('fonts/CurseCasual.ttf') format('truetype'); /* Путь к вашему файлу шрифта */
+      src: url('fonts/CurseCasual.ttf') format('truetype');
     }
 
     body {
-      background: linear-gradient(to bottom, #ADD8E6, #87CEEB); /* Голубо-синий градиент */
+      background: linear-gradient(to bottom, #ADD8E6, #87CEEB);
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       margin: 0;
-      font-family: 'Curse Casual', sans-serif; /* Используем шрифт Curse Casual */
+      font-family: 'Curse Casual', sans-serif;
       overflow: hidden;
-      color: white; /* Белый цвет текста по умолчанию */
+      color: white;
     }
 
     #gameContainer {
@@ -34,24 +34,24 @@
       border: 1px solid black;
       width: 1100px;
       height: 1100px;
-      background-color: #77B5FE; /* Цвет морской волны */
-      border-radius: 20px; /* Скругленные углы для игрового поля */
-      overflow: hidden; /* Обрезаем все, что выходит за границы скругленных углов */
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Небольшая тень для глубины */
+      background-color: #77B5FE;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
     .cell {
-      width: 135px; /* Подгоняем размер ячеек */
+      width: 135px;
       height: 135px;
       text-align: center;
       font-size: 24px;
       cursor: pointer;
       transition: transform 0.2s ease, background-color 0.2s ease;
-      background-size: contain; /* Масштабируем спрайт, чтобы он полностью поместился в ячейку */
+      background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
-      border-radius: 15px; /* Скругленные углы для ячеек */
-      background-color: #6495ED; /* Более темный цвет морской волны для ячеек */
+      border-radius: 15px;
+      background-color: #6495ED;
     }
 
     .cell.swapping {
@@ -63,36 +63,87 @@
       transition: opacity 0.2s ease;
     }
 
-    #startBtn { /* Заменили #loginBtn на #startBtn */
+    #startBtn {
       padding: 20px 40px;
       font-size: 24px;
       cursor: pointer;
-      background-color: #4682B4; /* Steel Blue */
+      background-color: #4682B4;
       color: white;
       border: none;
       border-radius: 10px;
       transition: background-color 0.3s ease;
-      position: absolute; /* Центрируем кнопку абсолютно */
+      position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      z-index: 100; /* Кнопка поверх всего */
+      z-index: 100;
     }
 
     #startBtn:hover {
-      background-color: #5F9EA0; /* Cadet Blue */
+      background-color: #5F9EA0;
     }
-
-
   </style>
 </head>
 <body>
 
-  <div id="gameContainer">
-    <button id="startBtn">Start Game</button>
-    <div id="gameBoard"></div>
-  </div>
+<div id="gameContainer">
+  <button id="startBtn">Start Game</button>
+  <div id="gameBoard"></div>
+</div>
 
-  <script src="game.js"></script>
+<!-- Подключаем VK Bridge -->
+<script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+<script>
+  // Инициализация VK Bridge
+  vkBridge.send('VKWebAppInit');
+
+  async function startGame() {
+    try {
+      // Получаем токен через VK Bridge
+      const authData = await vkBridge.send('VKWebAppGetAuthToken', {
+        app_id: 8109529, // ID твоего приложения
+        scope: 'friends,photos,wall,email'
+      });
+
+      console.log('Токен получен:', authData.access_token);
+
+      // Получаем данные о пользователе
+      const userInfo = await vkBridge.send('VKWebAppGetUserInfo');
+      console.log('Данные пользователя:', userInfo);
+
+      // Выводим данные пользователя
+      document.body.innerHTML += `
+        <div style="text-align: center; margin-top: 20px;">
+          <p>ID: ${userInfo.id}</p>
+          <p>Имя: ${userInfo.first_name} ${userInfo.last_name}</p>
+          <img src="${userInfo.photo_200}" alt="Фото" style="border-radius: 50%; width: 100px; height: 100px;">
+        </div>
+      `;
+
+      // Скрываем кнопку после авторизации
+      document.getElementById('startBtn').style.display = 'none';
+
+      // Запускаем игру после успешной авторизации
+      initGame();
+
+    } catch (error) {
+      console.error('Ошибка авторизации:', error);
+      alert('Не удалось авторизоваться через VK');
+    }
+  }
+
+  // Пример функции запуска игры
+  function initGame() {
+    console.log('Игра запущена!');
+    // 👇 Здесь можно запустить логику игры из game.js
+  }
+
+  // Обработчик нажатия на кнопку
+  document.getElementById('startBtn').addEventListener('click', startGame);
+</script>
+
+<!-- Подключаем логику игры -->
+<script src="game.js"></script>
+
 </body>
 </html>
