@@ -31,7 +31,7 @@
 
     #container {
       text-align: center;
-      max-width: 400px;
+      max-width: 900px;
       background: rgba(255, 255, 255, 0.2);
       padding: 20px;
       border-radius: 15px;
@@ -68,6 +68,39 @@
       color: #FF4747;
       font-weight: bold;
     }
+
+    #gameBoard {
+      display: grid;
+      grid-gap: 2px;
+      border: 1px solid #5F9EA0;
+      width: 870px;
+      height: 870px;
+      background-color: #77B5FE;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      margin: 20px auto;
+    }
+
+    .cell {
+      width: calc(870px / 8 - 2px);
+      height: calc(870px / 8 - 2px);
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    .cell.swapping {
+      transform: scale(1.2);
+    }
+
+    .cell.removing {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
   </style>
 </head>
 <body>
@@ -78,7 +111,7 @@
     <button id="authBtn">Play</button>
     <div class="status" id="status">Нажмите Play для начала</div>
     <div id="game" class="hidden">
-      <div class="status">Загрузка...</div>
+      <div id="gameBoard"></div>
     </div>
   </div>
 
@@ -87,14 +120,12 @@
     let accessToken = null;
     let userInfo = null;
 
-    // Функция отображения ошибок
     function showError(message) {
       const status = document.getElementById('status');
       status.textContent = message;
       status.classList.add('error');
     }
 
-    // Функция обновления статуса
     function updateStatus(message) {
       const status = document.getElementById('status');
       status.textContent = message;
@@ -122,7 +153,7 @@
         document.getElementById('userName').style.display = 'block';
 
         updateStatus('Добро пожаловать!');
-        await showGame();
+        showGame();
 
       } catch (error) {
         showError(`Ошибка: ${error.message || 'Неизвестная ошибка'}`);
@@ -136,11 +167,8 @@
       
       try {
         await loadGameScript();
-        if (typeof initializeGame === 'function') {
-          initializeGame({
-            token: accessToken,
-            user: userInfo
-          });
+        if (typeof startGame === 'function') {
+          startGame();
         } else {
           showError('Ошибка инициализации игры');
         }
