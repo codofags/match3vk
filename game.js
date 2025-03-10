@@ -167,49 +167,101 @@
       }
     }
 
-    // Функция для обработки и удаления совпадений (с анимацией)
-    async function handleMatches() {
-      let hasMatches;
+    // Проверка по вертикали
+    for (let col = 0; col < boardWidth; col++) {
+      for (let row = 0; row < boardHeight - 2; row++) {
+        const color = gameBoard[row][col];
+        if (color && color === gameBoard[row + 1][col] && color === gameBoard[row + 2][col]) {
+          matches.push({ row, col });
+          matches.push({ row: row + 1, col });
+          matches.push({ row: row + 2, col });
+        }
+      }
+    }
+    if (matches.length > 0) {
+      matchesFound = true;
+    }
+    return matchesFound;
+  }
+
+  // Функция для обработки и удаления совпадений (с анимацией)
+  async function handleMatches() {
+    let hasMatches;
+    do {
+      hasMatches = await removeMatchesWithAnimation();
+
+      if (hasMatches) {
+        dropCells();
+        renderBoard();
+      }
+    } while (hasMatches && findMatches());
+  }
+
+  async function removeMatchesWithAnimation() {
+    let matchesHorizontally = [];
+    let matchesVertically = [];
+
+    // Находим горизонтальные совпадения
+    for (let row = 0; row < boardHeight; row++) {
+      for (let col = 0; col < boardWidth - 2; col++) {
+        const color = gameBoard[row][col];
+        if (color === gameBoard[row][col + 1] && color === gameBoard[row][col + 2]) {
+          matchesHorizontally.push({ row, col });
+          matchesHorizontally.push({ row, col: col + 1 });
+          matchesHorizontally.push({ row, col: col + 2 });
+          col += 2;
+        }
+      }
+    }
+
+    // Находим вертикальные совпадения
+    for (let col = 0; col < boardWidth; col++) {
+      for (let row = 0; row < boardHeight - 2; row++) {
+        const color = gameBoard[row][col];
+        if (color === gameBoard[row + 1][col] && color === gameBoard[row + 2][col]) {
+          matchesVertically.push({ row, col });
+          matchesVertically.push({ row: row + 1, col });
+          matchesVertically.push({ row: row + 2, col });
+          row += 2;
+        }
+      }
+    }
+
+    const allMatches = new Set([...matchesHorizontally.map(m => JSON.stringify(m)), ...matchesVertically.map(m => JSON.stringify(m))]);
+    const uniqueMatches = Array.from(allMatches).map(m => JSON.parse(m));
+
+    // Анимация удаления и обновление очков
+    for (const match of uniqueMatches) {
+      const cell = document.querySelector(`.cell[data-row="${match.row}"][data-col="${match.col}"]`);
+      if (cell) {
+        cell.classList.add('removing');
+        await delay(200);
+        gameBoard[match.row][match.col] = null;
+      }
+    }
+    return uniqueMatches.length > 0;
+  }
+
+  // Функция для сдвига ячеек вниз
+  function dropCells() {
+    for (let col = 0; col < boardWidth; col++) {
+      let emptyRow = boardHeight - 1;
+
+      for (let row = boardHeight - 1; row >= 0; row--) {
+        if (gameBoard[row][col] !== null) {
+          gameBoard[emptyRow][col] = gameBoard[row][col];
+          if (row !== emptyRow) {
+            gameBoard[row][col] = null;
+          }
+          emptyRow--;
+        }
+      }
+    }
+    for (let row = emptyRow; row >= 0; row--) {
+      let color;
       do {
-        hasMatches = await removeMatchesWithAnimation();
-
-        if (hasMatches) {
-          dropCells();
-          renderBoard();
-        }
-      } while (hasMatches && findMatches());
+        color = getRandomColor();
+      } while (hasMatchAt(row, col, color));
+      gameBoard[row][col] = color;
     }
-
-    async function removeMatchesWithAnimation() {
-      let matchesHorizontally = [];
-      let matchesVertically = [];
-
-      // Находим горизонтальные совпадения
-      for (let row = 0; row < boardHeight; row++) {
-        for (let col = 0; col < boardWidth - 2; col++) {
-          const color = gameBoard[row][col];
-          if (color === gameBoard[row][col + 1] && color === gameBoard[row][col + 2]) {
-            matchesHorizontally.push({ row, col });
-            matchesHorizontally.push({ row, col: col + 1 });
-            matchesHorizontally.push({ row, col: col + 2 });
-            col += 2;
-          }
-        }
-      }
-    }
-
-    function dropCells() {
-      for (let col = 0; col < boardWidth; col++) {
-        let emptyRow = boardHeight - 1;
-
-        for (let row = boardHeight - 1; row >= 0; row--) {
-          if (gameBoard[row][col] !== null) {
-            gameBoard[emptyRow][col] = gameBoard[row][col];
-            if (row !== emptyRow) {
-              gameBoard[row][col] = null;
-            }
-            emptyRow--;
-          }
-        }
-      }
-    }
+  }
