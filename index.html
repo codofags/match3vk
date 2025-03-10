@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Match 3 Test</title>
+  <title>Match 3</title>
   <script src="https://unpkg.com/@vkontakte/vk-bridge@latest/dist/browser.min.js"></script>
   <style>
     body {
@@ -14,6 +14,19 @@
       justify-content: center;
       align-items: center;
       font-family: 'Arial', sans-serif;
+      position: relative;
+    }
+
+    #userName {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      font-size: 18px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 10px 15px;
+      border-radius: 15px;
+      display: none;
     }
 
     #container {
@@ -58,46 +71,45 @@
   </style>
 </head>
 <body>
+  <div id="userName"></div>
+  
   <div id="container">
     <h1>Тест авторизации</h1>
     <button id="authBtn">Войти через VK</button>
     <div class="status" id="status">Нажмите кнопку для авторизации</div>
     <div id="game" class="hidden">
-      <div class="status">Игра загружена!</div>
-      <button onclick="startGame()">Начать игру</button>
+      <div class="status">Загрузка игры...</div>
     </div>
   </div>
 
   <script>
-    // ЗАМЕНИТЕ НА СВОЙ APP_ID
     const APP_ID = 8109529; // ← УКАЖИТЕ СВОЙ ID ПРИЛОЖЕНИЯ
+    let accessToken = null;
+    let userInfo = null;
 
     async function initialize() {
       try {
-        // Проверка окружения
         if (!vkBridge.isEmbedded()) {
           throw new Error('Откройте приложение внутри VK!');
         }
 
-        // Инициализация VK Bridge
         await vkBridge.send('VKWebAppInit');
         updateStatus('VK Bridge инициализирован');
 
-        // Подписка на события
-        vkBridge.subscribe(({ type, data }) => {
-          if (type === 'VKWebAppUpdateConfig') {
-            const scheme = data.scheme ? data.scheme : 'client_light';
-            document.body.className = scheme;
-          }
-        });
-
-        // Запрос авторизации
+        // Получаем токен
         const authData = await vkBridge.send('VKWebAppGetAuthToken', {
           app_id: APP_ID,
-          scope: 'friends,photos'
+          scope: 'friends,photos' // Добавьте 'users' если нужно больше данных
         });
 
-        updateStatus(`Токен получен: ${authData.access_token.slice(0, 10)}...`);
+        accessToken = authData.access_token;
+        
+        // Получаем данные пользователя
+        userInfo = await vkBridge.send('VKWebAppGetUserInfo');
+        document.getElementById('userName').textContent = userInfo.first_name;
+        document.getElementById('userName').style.display = 'block';
+
+        updateStatus('Авторизация успешна!');
         showGame();
 
       } catch (error) {
@@ -106,30 +118,35 @@
       }
     }
 
-    function updateStatus(message) {
-      document.getElementById('status').textContent = message;
-    }
-
-    function showError(message) {
-      const status = document.getElementById('status');
-      status.textContent = message;
-      status.classList.add('error');
-    }
-
     function showGame() {
       document.getElementById('authBtn').classList.add('hidden');
       document.getElementById('game').classList.remove('hidden');
+      loadGameScript();
     }
 
-    function startGame() {
-      alert('Игра началась! (токен доступен в консоли)');
-      console.log('Game started with token:', vkBridge.storedToken);
+    function loadGameScript() {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'game.js';
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
     }
 
-    // Обработчик кнопки
+    window.startGame = () => {
+      if (typeof initializeGame === 'function') {
+        initializeGame({
+          token: accessToken,
+          user: userInfo
+        });
+      } else {
+        showError('Ошибка загрузки игрового модуля');
+      }
+    };
+
     document.getElementById('authBtn').addEventListener('click', initialize);
 
-    // Автоматический запуск в тестовом режиме
     if (window.location.search.includes('autotest=1')) {
       setTimeout(initialize, 1000);
     }
