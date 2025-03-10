@@ -88,41 +88,44 @@
 
   <script>
     async function startGame() {
-      // Скрыть кнопку сразу после нажатия
-      document.getElementById("startBtn").style.display = "none";
-
-      // Проверка на то, что приложение внутри VK Mini Apps
-      if (!vkBridge.isEmbedded()) {
-        console.warn("Приложение запущено не в VK Mini Apps. Некоторые функции могут не работать.");
+      // Скрытие кнопки сразу при нажатии
+      const startButton = document.getElementById("startBtn");
+      if (startButton) {
+        startButton.style.display = "none";
+      } else {
+        console.error("Кнопка не найдена");
       }
 
       try {
+        // Инициализация VK Bridge
         await vkBridge.send("VKWebAppInit");
         console.log("VK Bridge инициализирован");
-      } catch (error) {
-        console.error("Ошибка инициализации VK Bridge:", error);
-      }
 
-      try {
-        // Получение информации о пользователе
-        const userInfo = await vkBridge.send("VKWebAppGetUserInfo");
-        console.log("Данные пользователя:", userInfo);
-      } catch (error) {
-        console.error("Ошибка получения данных пользователя:", error);
-      }
-
-      try {
-        // Запрос токена
+        // Запрос токена с правами на доступ
         const authData = await vkBridge.send("VKWebAppGetAuthToken", {
-          app_id: YOUR_APP_ID,  // Замените на ID вашего приложения
+          app_id: YOUR_APP_ID,  // Укажите ID вашего приложения
           scope: "friends,photos"  // Укажите нужные права
         });
         console.log("Токен получен:", authData.access_token);
-      } catch (error) {
-        console.error("Ошибка получения токена:", error);
-      }
 
-      // Запуск игры
+        // Передача данных (например, токена) в игру через api_result
+        const apiResult = { access_token: authData.access_token };
+
+        // Вызов игрового кода с переданным результатом
+        initializeGame(apiResult);
+
+      } catch (error) {
+        console.error("Ошибка получения токена или инициализации:", error);
+        // Если ошибка, продолжаем игру без токена
+        initializeGame(null);
+      }
+    }
+
+    function initializeGame(apiResult) {
+      // Здесь начинается код игры, получаемый параметр api_result можно использовать
+      console.log("Результат API:", apiResult);
+
+      // Продолжаем выполнение логики игры
       if (typeof initializeBoard === "function") {
         initializeBoard();
         renderBoard();
