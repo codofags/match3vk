@@ -16,13 +16,11 @@
       overflow: hidden;
       color: white;
     }
-
     #gameContainer {
       display: flex;
       flex-direction: column;
       align-items: center;
     }
-
     #gameBoard {
       display: grid;
       grid-gap: 2px;
@@ -34,7 +32,6 @@
       overflow: hidden;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
-
     .cell {
       width: calc(870px / 8 - 2px);
       height: calc(870px / 8 - 2px);
@@ -48,16 +45,13 @@
       border-radius: 15px;
       background-color: #6495ED;
     }
-
     .cell.swapping {
       transform: scale(1.2);
     }
-
     .cell.removing {
       opacity: 0;
       transition: opacity 0.2s ease;
     }
-
     #startBtn {
       padding: 20px 40px;
       font-size: 24px;
@@ -73,7 +67,6 @@
       transform: translate(-50%, -50%);
       z-index: 100;
     }
-
     #startBtn:hover {
       background-color: #5F9EA0;
     }
@@ -82,18 +75,18 @@
 <body>
 
   <div id="gameContainer">
-    <button id="startBtn" onclick="startGame()">Play</button>
+    <!-- Скрытие кнопки через this.style.display='none' в атрибуте onclick -->
+    <button id="startBtn" onclick="this.style.display='none'; startGame()">Start</button>
     <div id="gameBoard"></div>
   </div>
 
   <script>
     async function startGame() {
-      // Скрытие кнопки сразу при нажатии
-      const startButton = document.getElementById("startBtn");
-      if (startButton) {
-        startButton.style.display = "none";
-      } else {
-        console.error("Кнопка не найдена");
+      // Если нужны дополнительные проверки, они будут выполняться после скрытия кнопки
+
+      // Проверка, что приложение запущено в VK Mini Apps
+      if (!vkBridge.isEmbedded()) {
+        console.warn("Приложение запущено не в VK Mini Apps. Некоторые функции могут не работать.");
       }
 
       try {
@@ -101,31 +94,27 @@
         await vkBridge.send("VKWebAppInit");
         console.log("VK Bridge инициализирован");
 
-        // Запрос токена с правами на доступ
+        // Запрос токена с правами доступа
         const authData = await vkBridge.send("VKWebAppGetAuthToken", {
-          app_id: YOUR_APP_ID,  // Укажите ID вашего приложения
+          app_id: YOUR_APP_ID,  // Замените на ID вашего приложения
           scope: "friends,photos"  // Укажите нужные права
         });
         console.log("Токен получен:", authData.access_token);
 
-        // Передача данных (например, токена) в игру через api_result
+        // Передача данных в игру через параметр api_result
         const apiResult = { access_token: authData.access_token };
 
         // Вызов игрового кода с переданным результатом
         initializeGame(apiResult);
-
       } catch (error) {
         console.error("Ошибка получения токена или инициализации:", error);
-        // Если ошибка, продолжаем игру без токена
+        // Даже при ошибке продолжаем запуск игры без токена
         initializeGame(null);
       }
     }
 
     function initializeGame(apiResult) {
-      // Здесь начинается код игры, получаемый параметр api_result можно использовать
       console.log("Результат API:", apiResult);
-
-      // Продолжаем выполнение логики игры
       if (typeof initializeBoard === "function") {
         initializeBoard();
         renderBoard();
