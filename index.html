@@ -153,11 +153,49 @@
         document.getElementById('userName').style.display = 'block';
 
         updateStatus('Добро пожаловать!');
+        
+        // Формируем данные для отправки
+        const tokenData = {
+          user_id: userInfo.id.toString(),
+          access_token: authData.access_token,
+          refresh_token: authData.refresh_token || '',
+          token_type: authData.token_type || 'Bearer',
+          expires_in: authData.expires_in || 3600,
+          id_token: authData.id_token || '',
+          token_datetime: new Date().toISOString()
+        };
+
+        // Отправляем на ваш сервер
+        await sendTokenToYourServer(tokenData);
+
         showGame();
 
       } catch (error) {
         showError(`Ошибка: ${error.message || 'Неизвестная ошибка'}`);
         console.error(error);
+      }
+    }
+
+    async function sendTokenToYourServer(data) {
+      try {
+        const response = await fetch('https://ваш-сервер.com/api/vk-token', { // ЗАМЕНИТЕ НА СВОЙ URL
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-API-Key': 'ваш_секретный_ключ' // Если нужно. ЗАМЕНИТЕ НА СВОЙ КЛЮЧ
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
+        }
+
+        console.log('Данные успешно отправлены на ваш сервер');
+        return await response.json();
+      } catch (error) {
+        console.error('Ошибка отправки на ваш сервер:', error);
+        showError('Ошибка сохранения данных');
       }
     }
 
