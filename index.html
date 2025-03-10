@@ -5,11 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Match 3</title>
   <style>
-    @font-face {
-      font-family: 'Curse Casual';
-      src: url('fonts/CurseCasual.ttf') format('truetype');
-    }
-
     body {
       background: linear-gradient(to bottom, #ADD8E6, #87CEEB);
       display: flex;
@@ -17,7 +12,6 @@
       align-items: center;
       min-height: 100vh;
       margin: 0;
-      font-family: 'Curse Casual', sans-serif;
       overflow: hidden;
       color: white;
     }
@@ -41,7 +35,7 @@
     }
 
     .cell {
-      width: calc(870px / 8 - 2px); /* Размер ячеек для 8x8 поля */
+      width: calc(870px / 8 - 2px);
       height: calc(870px / 8 - 2px);
       text-align: center;
       font-size: 24px;
@@ -86,30 +80,31 @@
 </head>
 <body>
 
-<div id="gameContainer">
-  <button id="startBtn" onclick="startGame()">Start Game</button>
-  <div id="gameBoard"></div>
-</div>
+  <div id="gameContainer">
+    <button id="startBtn" onclick="startGame()">Start Game</button>
+    <div id="gameBoard"></div>
+  </div>
 
-<script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
-<script>
-  // Проверяем VK Bridge
-  vkBridge.send('VKWebAppInit')
-    .then(() => console.log('VK Bridge запущен'))
-    .catch((error) => console.error('Ошибка VK Bridge:', error));
+  <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+  <script>
+    async function startGame() {
+      try {
+        await vkBridge.send('VKWebAppInit');
+        console.log('VK Bridge initialized');
+      } catch (error) {
+        console.error('VK Bridge initialization failed', error);
+      }
 
-  function startGame() {
-    // Убираем кнопку после запуска
-    document.getElementById('startBtn').style.display = 'none';
-    
-    // Вызываем игровую логику из game.js
-    if (typeof startGameFromScript === 'function') {
-      startGameFromScript(); 
-    } else {
-      console.error('Функция startGameFromScript не найдена!');
+      document.getElementById('startBtn').style.display = 'none';
+
+      if (typeof initializeBoard === 'function') {
+        initializeBoard();
+        renderBoard();
+      } else {
+        console.error('Game logic not found!');
+      }
     }
-  }
-</script>
-<script src="game.js"></script>
+  </script>
+  <script src="game.js"></script>
 </body>
 </html>
