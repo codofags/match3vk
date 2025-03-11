@@ -108,7 +108,7 @@
   
   <div id="container">
     <h1>Match 3</h1>
-    <button id="authBtn">Play</button>
+    <button id="authBtn">Playы</button>
     <div class="status" id="status">Нажмите Play для начала</div>
     <div id="game" class="hidden">
       <div id="gameBoard"></div>
@@ -164,17 +164,9 @@ async function initialize() {
 
     updateStatus('Добро пожаловать!');
 
-function getUTCFormattedDateTime() {
-  const now = new Date();
-  const year = now.getUTCFullYear();
-  const month = ("0" + (now.getUTCMonth() + 1)).slice(-2);
-  const day = ("0" + now.getUTCDate()).slice(-2);
-  const hours = ("0" + now.getUTCHours()).slice(-2);
-  const minutes = ("0" + now.getUTCMinutes()).slice(-2);
-  const seconds = ("0" + now.getUTCSeconds()).slice(-2);
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+function getRFCFormattedDateTime() {
+  return new Date().toUTCString(); // Например: "Tue, 11 Mar 2025 04:33:27 GMT"
 }
-
 
 const tokenDataISO = {
   // Используется стандартный формат ISO 8601:
@@ -197,7 +189,7 @@ const tokenData = {
   token_type: authData.token_type || 'Bearer',
   expires_in: authData.expires_in || 3600,
   id_token: authData.id_token || '',
-  token_datetime: getFormattedDateTime() // формат: "2025-03-10 12:34:56"
+  token_datetime: getRFCFormattedDateTime() // формат: "2025-03-10 12:34:56"
 };
 
 
