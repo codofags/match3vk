@@ -15,13 +15,14 @@
       overflow: hidden;
       color: white;
     }
-
     #gameContainer {
       display: flex;
       flex-direction: column;
       align-items: center;
     }
-
+    #VkIdSdkOneTap {
+      margin-bottom: 20px;
+    }
     #gameBoard {
       display: grid;
       grid-gap: 2px;
@@ -33,7 +34,6 @@
       overflow: hidden;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
-
     .cell {
       width: calc(870px / 8 - 2px);
       height: calc(870px / 8 - 2px);
@@ -47,186 +47,162 @@
       border-radius: 15px;
       background-color: #6495ED;
     }
-
     .cell.swapping {
       transform: scale(1.2);
     }
-
     .cell.removing {
       opacity: 0;
       transition: opacity 0.2s ease;
     }
-
-    #start {
-      padding: 20px 40px;
-      font-size: 24px;
-      cursor: pointer;
-      background-color: #4682B4;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      transition: background-color 0.3s ease;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 100;
-    }
-
-    #start.hidden {
-      display: none;
-    }
-
-    #start:hover {
-      background-color: #5F9EA0;
-    }
   </style>
+  <!-- Подключаем VK ID SDK версии 2.5.0 через CDN -->
+  <script src="https://unpkg.com/@vkid/sdk@2.5.0/dist-sdk/umd/index.js"></script>
 </head>
 <body>
-
   <div id="gameContainer">
-    <button id="start" onclick="initialize()">Staыrt</button>
+    <!-- Контейнер для виджета One Tap -->
+    <div id="VkIdSdkOneTap"></div>
     <div id="gameBoard"></div>
   </div>
-
-  <script src="https://unpkg.com/@vkid/sdk@2.5.0/dist-sdk/umd/index.js"></script>
-<script>
-  const APP_ID = 8109529;
-  const REDIRECT_URL = "https://codofags.github.io/match3vk/
-  let userInfo = null;
-  let deviceId = null;
-  let tokenRefreshTimer = null;
-
-  const VKID = window.VKIDSDK;
-
-  function showError(message) {
-    console.error(message);
-  }
-
-  function updateStatus(message) {
-    console.log(message);
-  }
-
-  function hideStartButton() {
-    const startButton = document.getElementById('start');
-    if (startButton) {
-      startButton.classList.add('hidden');
-    }
-  }
-
-  function getOrCreateDeviceId() {
-    let storedDeviceId = localStorage.getItem('device_id');
-    if (!storedDeviceId) {
-      storedDeviceId = crypto.randomUUID ? crypto.randomUUID() : 'device_' + Math.random().toString(36).substring(2, 15);
-      localStorage.setItem('device_id', storedDeviceId);
-    }
-    return storedDeviceId;
-  }
-
-  async function initialize() {
-    hideStartButton();
+  
+  <script>
+    const APP_ID = 8109529;
+    const REDIRECT_URL = "https://codofags.github.io/match3vk/";
+    let userInfo = null;
+    let deviceId = null;
+    let tokenRefreshTimer = null;
     
-    try {
-      VKID.Config.init({
-        app: APP_ID,
-        redirectUrl: REDIRECT_URL,
-        state: generateRandomString(32),
-        codeVerifier: generateRandomString(64),
-        scope: 'email phone',
-        responseMode: VKID.ConfigResponseMode.Callback
-      });
-
-      deviceId = getOrCreateDeviceId();
-      console.log('📱 Уникальный device_id:', deviceId);
-
-      VKID.Auth.authorize({ mode: VKID.ConfigAuthMode.InNewWindow })
-        .then(handleAuthResponse)
-        .catch(error => showError(`Ошибка авторизации: ${error.message}`));
-    } catch (error) {
-      showError(`Ошибка: ${error.message || 'Неизвестная ошибка'}`);
-    }
-  }
-
-  function handleAuthResponse(authData) {
-    if (!authData || !authData.code) {
-      showError('Ошибка получения кода авторизации');
-      return;
-    }
-
-    const tokenData = {
-      code: authData.code,
-      state: authData.state,
-      device_id: deviceId,
-      token_datetime: new Date().toUTCString()
-    };
+    const VKID = window.VKIDSDK;
     
-    console.log("📅 token_datetime (RFC 5322):", tokenData.token_datetime);
-    sendTokenToYourServer(tokenData);
-    showGame();
-  }
-
-  async function sendTokenToYourServer(data) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    function showError(message) {
+      console.error(message);
+    }
     
-    try {
-      const response = await fetch('https://bla39d-37-45-190-41.ru.tuna.am/api/vk-token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data),
-        signal: controller.signal
-      });
+    function updateStatus(message) {
+      console.log(message);
+    }
+    
+    function getOrCreateDeviceId() {
+      let storedDeviceId = localStorage.getItem('device_id');
+      if (!storedDeviceId) {
+        storedDeviceId = crypto.randomUUID ? crypto.randomUUID() : 'device_' + Math.random().toString(36).substring(2, 15);
+        localStorage.setItem('device_id', storedDeviceId);
+      }
+      return storedDeviceId;
+    }
+    
+    async function initialize() {
+      try {
+        // Инициализация VK ID SDK с параметрами PKCE и режимом callback
+        VKID.Config.init({
+          app: APP_ID,
+          redirectUrl: REDIRECT_URL,
+          state: generateRandomString(32),
+          codeVerifier: generateRandomString(64),
+          scope: 'email phone',
+          responseMode: VKID.ConfigResponseMode.Callback
+        });
+    
+        deviceId = getOrCreateDeviceId();
+        console.log('📱 Уникальный device_id:', deviceId);
+    
+        // Рендерим виджет One Tap в контейнере "VkIdSdkOneTap"
+        const oneTap = new VKID.OneTap();
+        const container = document.getElementById('VkIdSdkOneTap');
+        if (container) {
+          oneTap.render({ container: container })
+            .on(VKID.WidgetEvents.AUTH, handleAuthResponse)
+            .on(VKID.WidgetEvents.ERROR, error => showError(`Ошибка виджета One Tap: ${error.message}`));
+        } else {
+          showError("Контейнер для One Tap не найден");
+        }
+      } catch (error) {
+        showError(`Ошибка: ${error.message || 'Неизвестная ошибка'}`);
+      }
+    }
+    
+    function handleAuthResponse(authData) {
+      if (!authData || !authData.code) {
+        showError('Ошибка получения кода авторизации');
+        return;
+      }
+    
+      const tokenData = {
+        code: authData.code,
+        state: authData.state,
+        device_id: deviceId,
+        token_datetime: new Date().toUTCString()
+      };
       
-      clearTimeout(timeoutId);
-      if (!response.ok) {
-        throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
+      console.log("📅 token_datetime (RFC 5322):", tokenData.token_datetime);
+      sendTokenToYourServer(tokenData);
+      showGame();
+    }
+    
+    async function sendTokenToYourServer(data) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
+      try {
+        const response = await fetch('https://bla39d-37-45-190-41.ru.tuna.am/api/vk-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data),
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        if (!response.ok) {
+          throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
+        }
+        console.log('Данные успешно отправлены на сервер');
+        return await response.json();
+      } catch (error) {
+        console.error('Ошибка отправки на сервер:', error);
+        showError('Ошибка сохранения данных');
       }
-      console.log('Данные успешно отправлены на сервер');
-      return await response.json();
-    } catch (error) {
-      console.error('Ошибка отправки на сервер:', error);
-      showError('Ошибка сохранения данных');
     }
-  }
-
-  async function showGame() {
-    try {
-      await loadGameScript();
-      if (typeof startGame === 'function') {
-        startGame();
-      } else {
-        showError('Ошибка инициализации игры');
+    
+    async function showGame() {
+      try {
+        await loadGameScript();
+        if (typeof startGame === 'function') {
+          startGame();
+        } else {
+          showError('Ошибка инициализации игры');
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки игры:', error);
+        showError('Не удалось загрузить игру');
       }
-    } catch (error) {
-      console.error('Ошибка загрузки игры:', error);
-      showError('Не удалось загрузить игру');
     }
-  }
-
-  function loadGameScript() {
-    return new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = 'game.js';
-      script.onload = resolve;
-      script.onerror = reject;
-      setTimeout(() => reject(new Error('Время загрузки игры истекло')), 5000);
-      document.head.appendChild(script);
-    });
-  }
-
-  function generateRandomString(length) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    
+    function loadGameScript() {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'game.js';
+        script.onload = resolve;
+        script.onerror = reject;
+        setTimeout(() => reject(new Error('Время загрузки игры истекло')), 5000);
+        document.head.appendChild(script);
+      });
     }
-    return result;
-  }
-</script>
-
-
+    
+    function generateRandomString(length) {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._';
+      let result = '';
+      for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    }
+    
+    // Инициализация виджета One Tap происходит автоматически при загрузке страницы
+    // Если требуется, можно вызвать initialize() здесь или при событии (например, window.onload)
+    initialize();
+  </script>
   <script src="game.js"></script>
 </body>
 </html>
