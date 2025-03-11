@@ -108,7 +108,7 @@
   
   <div id="container">
     <h1>Match 3</h1>
-    <button id="authBtn">Start4</button>
+    <button id="authBtn">Start</button>
     <div class="status" id="status">Нажмите Play для начала</div>
     <div id="game" class="hidden">
       <div id="gameBoard"></div>
@@ -188,7 +188,14 @@ const tokenData = {
   token_datetime: getRFCFormattedDateTime() // формат: "2025-03-10 12:34:56"
 };
 
+function getRFCFormattedDateTime() {
+  return new Date().toUTCString(); // Например: "Tue, 11 Mar 2025 04:33:27 GMT"
+}
 
+const tokenDataISO = {
+  // Используется стандартный формат ISO 8601:
+  token_datetime: new Date().toISOString()
+};
 
     // Отправляем токен на сервер
     await sendTokenToYourServer(tokenData);
