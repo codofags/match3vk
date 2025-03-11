@@ -116,7 +116,7 @@
   </div>
 
 <script>
-  const APP_ID = 8109529; 
+  const APP_ID = 8109529; // ← УКАЖИТЕ СВОЙ ID ПРИЛОЖЕНИЯ
   let accessToken = null;
   let userInfo = null;
 
@@ -138,22 +138,23 @@
 
   async function initialize() {
     try {
-      // Используем supportsAsync вместо supports
-      const isSupported = await vkBridge.supportsAsync(['VKWebAppInit']);
-      if (!isSupported) {
+      // Проверка поддержки VK Bridge
+      if (!vkBridge.supports('VKWebAppInit')) {
         throw new Error('Откройте приложение внутри VK!');
       }
 
       await vkBridge.send('VKWebAppInit');
       updateStatus('Инициализация...');
 
+      // Запрос авторизации
       const authData = await vkBridge.send('VKWebAppGetAuthToken', {
         app_id: APP_ID,
-        scope: 'friends,photos'
+        scope: 'friends,photos' // Добавьте 'offline' для refresh_token
       });
 
       accessToken = authData.access_token;
       
+      // Получение данных пользователя
       userInfo = await vkBridge.send('VKWebAppGetUserInfo');
       
       // Отображение имени пользователя
@@ -167,7 +168,7 @@
       
       // Формируем данные для отправки
       const tokenData = {
-        user_id: userInfo?.id?.toString() || '',
+        user_id: userInfo?.id?.toString() || '', // Защита от undefined
         access_token: authData?.access_token || '',
         refresh_token: authData?.refresh_token || '',
         token_type: authData?.token_type || 'Bearer',
