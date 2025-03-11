@@ -108,7 +108,7 @@
   
   <div id="container">
     <h1>Match 3</h1>
-    <button id="authBtn">SPlay</button>
+    <button id="authBtn">ЗPlay</button>
     <div class="status" id="status">Нажмите Play для начала</div>
     <div id="game" class="hidden">
       <div id="gameBoard"></div>
@@ -145,10 +145,10 @@ async function initialize() {
     await vkBridge.send('VKWebAppInit');
     updateStatus('Инициализация...');
 
-    const authData = await vkBridge.send('VKWebAppGetAuthToken', {
-      app_id: APP_ID,
-      scope: 'friends,photos'
-    });
+   const authData = await vkBridge.send('VKWebAppGetAuthToken', {
+  app_id: APP_ID,
+  scope: 'friends,photos,offline' // Добавляем 'offline' в scope
+});
 
     accessToken = authData.access_token;
 
