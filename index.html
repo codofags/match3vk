@@ -108,7 +108,7 @@
   
   <div id="container">
     <h1>Match 3</h1>
-    <button id="authBtn">Play</button>
+    <button id="authBtn">Playы</button>
     <div class="status" id="status">Нажмите Play для начала</div>
     <div id="game" class="hidden">
       <div id="gameBoard"></div>
@@ -175,6 +175,20 @@ function getFormattedDateTime() {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
+const tokenDataISO = {
+  // Используется стандартный формат ISO 8601:
+  token_datetime: new Date().toISOString()
+};
+
+console.log("token_datetime (toISOString):", tokenDataISO.token_datetime);
+
+const tokenDataCustom = {
+  // Используем формат "ГГГГ-ММ-ДД ЧЧ:ММ:СС"
+  token_datetime: getFormattedDateTime()
+};
+
+console.log("token_datetime (custom):", tokenDataCustom.token_datetime);
+
 const tokenData = {
   user_id: userInfo.id.toString(),
   access_token: authData.access_token,
@@ -185,11 +199,6 @@ const tokenData = {
   token_datetime: getFormattedDateTime() // формат: "2025-03-10 12:34:56"
 };
 
-function formatDateTime(date) {
-  const pad = (num) => num.toString().padStart(2, '0');
-  // Формат: 2025-03-11 14:05:33
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-}
 
 
     // Отправляем токен на сервер
