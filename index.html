@@ -180,8 +180,8 @@ const tokenDataCustom = {
   token_datetime: getFormattedDateTime()
 };
 
-console.log("token_datetime (custom):", tokenDataCustom.token_datetime);
 
+console.log("token_datetime (RFC 5322):", tokenData.token_datetime);
 const tokenData = {
   user_id: userInfo.id.toString(),
   access_token: authData.access_token,
