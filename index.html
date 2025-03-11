@@ -108,7 +108,7 @@
   
   <div id="container">
     <h1>Match 3</h1>
-    <button id="authBtn">ЫStart</button>
+    <button id="authBtn">Playt</button>
     <div class="status" id="status">Нажмите Play для начала</div>
     <div id="game" class="hidden">
       <div id="gameBoard"></div>
@@ -171,7 +171,7 @@ async function initialize() {
   token_type: authData.token_type || 'Bearer',
   expires_in: authData.expires_in || 3600,
   id_token: authData.id_token || '',
-  token_datetime: formatDateTime(new Date()) // Форматируем дату правильно
+   token_datetime: new Date().toISOString()
 };
 
 function formatDateTime(date) {
