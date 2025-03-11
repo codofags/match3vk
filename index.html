@@ -85,7 +85,7 @@
 <body>
 
   <div id="gameContainer">
-    <button id="start" onclick="initialize()">S7tart</button>
+    <button id="start" onclick="initialize()">Start</button>
     <div id="gameBoard"></div>
   </div>
 
@@ -101,6 +101,9 @@ function hideStartButton() {
   if (startButton) {
     startButton.classList.add('hidden');
   }
+}
+function showError(message) {
+  console.error(message);
 }
 async function initialize() {
   hideStartButton();
