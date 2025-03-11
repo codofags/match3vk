@@ -108,7 +108,7 @@
   
   <div id="container">
     <h1>Match 3</h1>
-    <button id="authBtn">Playt</button>
+    <button id="authBtn">Play</button>
     <div class="status" id="status">Нажмите Play для начала</div>
     <div id="game" class="hidden">
       <div id="gameBoard"></div>
@@ -164,14 +164,25 @@ async function initialize() {
 
     updateStatus('Добро пожаловать!');
 
- const tokenData = {
+function getFormattedDateTime() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = ("0" + (now.getMonth() + 1)).slice(-2);
+  const day = ("0" + now.getDate()).slice(-2);
+  const hours = ("0" + now.getHours()).slice(-2);
+  const minutes = ("0" + now.getMinutes()).slice(-2);
+  const seconds = ("0" + now.getSeconds()).slice(-2);
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+const tokenData = {
   user_id: userInfo.id.toString(),
   access_token: authData.access_token,
   refresh_token: authData.refresh_token || 'NO_REFRESH_TOKEN',
   token_type: authData.token_type || 'Bearer',
   expires_in: authData.expires_in || 3600,
   id_token: authData.id_token || '',
-   token_datetime: new Date().toISOString()
+  token_datetime: getFormattedDateTime() // формат: "2025-03-10 12:34:56"
 };
 
 function formatDateTime(date) {
