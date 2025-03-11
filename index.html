@@ -108,7 +108,7 @@
   
   <div id="container">
     <h1>Match 3</h1>
-    <button id="authBtn">Start</button>
+    <button id="authBtn">Play</button>
     <div class="status" id="status">Нажмите Play для начала</div>
     <div id="game" class="hidden">
       <div id="gameBoard"></div>
@@ -116,7 +116,7 @@
   </div>
 
 <script>
-  const APP_ID = 8109529; // ← УКАЖИТЕ СВОЙ ID ПРИЛОЖЕНИЯ
+  const APP_ID = 8109529; 
   let accessToken = null;
   let userInfo = null;
 
@@ -149,7 +149,7 @@
       // Запрос авторизации
       const authData = await vkBridge.send('VKWebAppGetAuthToken', {
         app_id: APP_ID,
-        scope: 'friends,photos' // Добавьте 'offline' для refresh_token
+        scope: 'friends,photos,offline' // Добавьте 'offline' для refresh_token
       });
 
       accessToken = authData.access_token;
