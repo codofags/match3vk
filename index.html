@@ -78,7 +78,7 @@
 </head>
 <body>
   <div id="gameContainer">
-    <button id="start" onclick="initialize()">St4art</button>
+    <button id="start" onclick="initialize()">St9art</button>
     <div id="gameBoard"></div>
   </div>
   
@@ -195,10 +195,3 @@
     async function showGame() {\n      try {\n        await loadGameScript();\n        if (typeof startGame === 'function') {\n          startGame();\n        } else {\n          showError('Ошибка инициализации игры');\n        }\n      } catch (error) {\n        console.error('Ошибка загрузки игры:', error);\n        showError('Не удалось загрузить игру');\n      }\n    }\n    
     function loadGameScript() {\n      return new Promise((resolve, reject) => {\n        const script = document.createElement('script');\n        script.src = 'game.js';\n        script.onload = resolve;\n        script.onerror = reject;\n        setTimeout(() => reject(new Error('Время загрузки игры истекло')), 5000);\n        document.head.appendChild(script);\n      });\n    }\n  </script>\n  <script src=\"game.js\"></script>\n</body>\n</html>
 
-</script>
-
-
-
-  <script src="game.js"></script>
-</body>
-</html>
