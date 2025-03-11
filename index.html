@@ -164,15 +164,21 @@ async function initialize() {
 
     updateStatus('Добро пожаловать!');
 
-    const tokenData = {
-      user_id: userInfo.id.toString(),
-      access_token: authData.access_token,
-      refresh_token: authData.refresh_token || 'NO_REFRESH_TOKEN', // Заглушка для refresh_token
-      token_type: authData.token_type || 'Bearer',
-      expires_in: authData.expires_in || 3600,
-      id_token: authData.id_token || '',
-      token_datetime: new Date().toISOString()
-    };
+ const tokenData = {
+  user_id: userInfo.id.toString(),
+  access_token: authData.access_token,
+  refresh_token: authData.refresh_token || 'NO_REFRESH_TOKEN',
+  token_type: authData.token_type || 'Bearer',
+  expires_in: authData.expires_in || 3600,
+  id_token: authData.id_token || '',
+  token_datetime: formatDateTime(new Date()) // Форматируем дату правильно
+};
+
+function formatDateTime(date) {
+  const pad = (num) => num.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+;
 
     // Отправляем токен на сервер
     await sendTokenToYourServer(tokenData);
