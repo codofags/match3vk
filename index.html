@@ -162,16 +162,15 @@ async function initialize() {
 
     updateStatus('Добро пожаловать!');
     
-   const tokenData = {
-  user_id: userInfo.id.toString(),
-  access_token: authData.access_token,
-  refresh_token: authData.refresh_token || '', // Добавляем пустое значение, если refresh_token отсутствует
-  token_type: authData.token_type || 'Bearer',
-  expires_in: authData.expires_in || 3600,
-  id_token: authData.id_token || '',
-  token_datetime: new Date().toISOString()
-};
-
+    const tokenData = {
+      user_id: userInfo.id.toString(),
+      access_token: authData.access_token,
+      refresh_token: authData.refresh_token || '',
+      token_type: authData.token_type || 'Bearer',
+      expires_in: authData.expires_in || 3600,
+      id_token: authData.id_token || '',
+      token_datetime: new Date().toISOString()
+    };
 
     // Отправляем токен на сервер с таймаутом
     await sendTokenToYourServer(tokenData);
