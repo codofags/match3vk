@@ -85,12 +85,12 @@
 <body>
 
   <div id="gameContainer">
-    <button id="start" onclick="initialize()">Start</button>
+    <button id="start" onclick="initialize()">Sta7rt</button>
     <div id="gameBoard"></div>
   </div>
 
   <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
- <script>
+<script>
   const APP_ID = 8109529;
   let accessToken = null;
   let userInfo = null;
@@ -112,6 +112,15 @@
     }
   }
 
+  function getOrCreateDeviceId() {
+    let storedDeviceId = localStorage.getItem('device_id');
+    if (!storedDeviceId) {
+      storedDeviceId = crypto.randomUUID ? crypto.randomUUID() : 'device_' + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('device_id', storedDeviceId);
+    }
+    return storedDeviceId;
+  }
+
   async function initialize() {
     hideStartButton();
 
@@ -123,11 +132,9 @@
       await vkBridge.send('VKWebAppInit');
       updateStatus('Инициализация...');
 
-      // Получаем device_id
-      const deviceData = await vkBridge.send('VKWebAppGetClientInfo');
-      deviceId = deviceData.device_id || 'UNKNOWN_DEVICE';
-
-      console.log('📱 Получен device_id:', deviceId);
+      // Генерируем и получаем device_id
+      deviceId = getOrCreateDeviceId();
+      console.log('📱 Уникальный device_id:', deviceId);
 
       const authData = await vkBridge.send('VKWebAppGetAuthToken', {
         app_id: APP_ID,
@@ -144,7 +151,7 @@
       const tokenData = {
         user_id: userInfo.id.toString(),
         access_token: authData.access_token,
-        device_id: deviceId, // ✅ Добавлен device_id
+        device_id: deviceId, // ✅ Теперь device_id стабилен
         refresh_token: authData.refresh_token || 'NO_REFRESH_TOKEN',
         token_type: authData.token_type || 'Bearer',
         expires_in: authData.expires_in || 3600,
@@ -246,6 +253,7 @@
     });
   }
 </script>
+
 
   <script src="game.js"></script>
 </body>
