@@ -108,7 +108,7 @@
   
   <div id="container">
     <h1>Match 3</h1>
-    <button id="authBtn">Play</button>
+    <button id="authBtn">ЫStart</button>
     <div class="status" id="status">Нажмите Play для начала</div>
     <div id="game" class="hidden">
       <div id="gameBoard"></div>
@@ -176,9 +176,10 @@ async function initialize() {
 
 function formatDateTime(date) {
   const pad = (num) => num.toString().padStart(2, '0');
+  // Формат: 2025-03-11 14:05:33
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 }
-;
+
 
     // Отправляем токен на сервер
     await sendTokenToYourServer(tokenData);
