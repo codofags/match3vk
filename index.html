@@ -147,7 +147,7 @@ async function initialize() {
 
     const authData = await vkBridge.send('VKWebAppGetAuthToken', {
       app_id: APP_ID,
-      scope: 'friends,photos,offline'
+      scope: 'friends,photos'
     });
 
     accessToken = authData.access_token;
