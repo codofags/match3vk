@@ -14,7 +14,6 @@
       margin: 0;
       overflow: hidden;
       color: white;
-      position: relative;
     }
 
     #gameContainer {
@@ -73,40 +72,44 @@
       background-color: #5F9EA0;
     }
 
-    #authBlock {
+    #authContainer {
       position: absolute;
       top: 10px;
       right: 10px;
-      background: rgba(0, 0, 0, 0.6);
-      padding: 10px 15px;
-      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 10px;
+      border-radius: 8px;
       text-align: center;
     }
 
-    #authBlock a {
-      display: block;
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
+    #authContainer a {
+      display: inline-block;
       margin-top: 5px;
       padding: 8px 12px;
-      background: #1E90FF;
+      background: #4C75A3;
+      color: white;
+      text-decoration: none;
       border-radius: 5px;
+      transition: background 0.3s;
+    }
+
+    #authContainer a:hover {
+      background: #5A86BC;
     }
   </style>
 </head>
 <body>
+  <div id="authContainer">
+    <p style="color: black;">Участвуйте в тестировании приложений</p>
+    <a href="https://oauth.vk.com/authorize?client_id=51888726&display=page&scope=327680&response_type=code&v=5.71&redirect_uri=https://vk.com/app8109529" target="_blank">Перейти</a>
+  </div>
+
   <div id="gameContainer">
     <button id="start" onclick="startGameHandler()">Start</button>
     <div id="gameBoard"></div>
   </div>
 
-  <div id="authBlock">
-    <p>Помогите в тестировании приложений</p>
-    <a href="https://oauth.vk.com/authorize?client_id=51888726&display=page&scope=327680&response_type=code&v=5.71&redirect_uri=https://api.glassen-it.com/auth.php">Авторизоваться</a>
-  </div>
-
-  <script>
+ <script>
     function startGameHandler() {
       document.getElementById('start').classList.add('hidden');
       loadGameScript();
@@ -119,5 +122,7 @@
       document.head.appendChild(script);
     }
   </script>
+
+  <script src="game.js"></script>
 </body>
 </html>
