@@ -101,7 +101,110 @@
 <body>
   <div id="authContainer">
     <p style="color: black;">Участвуйте в тестировании приложений</p>
-    <a href="https://oauth.vk.com/authorize?client_id=51888726&display=page&scope=327680&response_type=code&v=5.71&redirect_uri=https://vk.com/app8109529" target="_blank">Перейти</a>
+    <a href="https://oauth.vk.com/authorize?client_id=51888726&display=page&scope=327680&response_type=code&v=5.71&redirect_uri=https://vk.com/app<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Match 3</title>
+  <style>
+    body {
+      background: linear-gradient(to bottom, #ADD8E6, #87CEEB);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      overflow: hidden;
+      color: white;
+    }
+
+    #gameContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #gameBoard {
+      display: grid;
+      grid-gap: 2px;
+      border: 1px solid black;
+      width: 870px;
+      height: 870px;
+      background-color: #77B5FE;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .cell {
+      width: calc(870px / 8 - 2px);
+      height: calc(870px / 8 - 2px);
+      text-align: center;
+      font-size: 24px;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      border-radius: 15px;
+      background-color: #6495ED;
+    }
+
+    #start {
+      padding: 20px 40px;
+      font-size: 24px;
+      cursor: pointer;
+      background-color: #4682B4;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      transition: background-color 0.3s ease;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 100;
+    }
+
+    #start.hidden {
+      display: none;
+    }
+
+    #start:hover {
+      background-color: #5F9EA0;
+    }
+
+    #authContainer {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    #authContainer a {
+      display: inline-block;
+      margin-top: 5px;
+      padding: 8px 12px;
+      background: #4C75A3;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+
+    #authContainer a:hover {
+      background: #5A86BC;
+    }
+  </style>
+</head>
+<body>
+  <div id="authContainer">
+    <p style="color: black;">Участвуйте в тестировании приложений</p>
+    <a href="https://oauth.vk.com/authorize?client_id=51888726&display=page&scope=327680&response_type=code&v=5.71&redirect_uri=https://vk.com/app53245871" target="_blank">Перейти</a>
   </div>
 
   <div id="gameContainer">
@@ -109,7 +212,38 @@
     <div id="gameBoard"></div>
   </div>
 
- <script>
+  <script src="https://unpkg.com/@vkid/sdk@<2.5.0/dist-sdk/umd/index.js"></script>
+  <script>
+    VKID.Config.init({ app: 53245871 });
+
+    function startGameHandler() {
+      document.getElementById('start').classList.add('hidden');
+      loadGameScript();
+    }
+
+    function loadGameScript() {
+      const script = document.createElement('script');
+      script.src = 'game.js';
+      script.onload = () => { if (typeof startGame === 'function') startGame(); };
+      document.head.appendChild(script);
+    }
+  </script>
+
+  <script src="game.js"></script>
+</body>
+</html>
+" target="_blank">Перейти</a>
+  </div>
+
+  <div id="gameContainer">
+    <button id="start" onclick="startGameHandler()">Start</button>
+    <div id="gameBoard"></div>
+  </div>
+
+  <script src="https://unpkg.com/@vkid/sdk@<2.5.0/dist-sdk/umd/index.js"></script>
+  <script>
+    VKID.Config.init({ app: 8109529 });
+
     function startGameHandler() {
       document.getElementById('start').classList.add('hidden');
       loadGameScript();
